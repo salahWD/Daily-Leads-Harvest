@@ -9,16 +9,17 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
 
 export type LeadCardProps = {
-  name: string,
-  relationShip: string,
-  contactMedia: string,
+  id?: number,
+  leadsCount?: number,
+  name?: string,
+  relationShip?: string,
+  contactMedia?: string,
   date: Date | null,
 }
 
-export default function LeadCard({ name, relationShip, contactMedia, date = null }: LeadCardProps) {
+export default function LeadCard({ name, relationShip, contactMedia, leadsCount = 1, date = null }: LeadCardProps) {
 
   const formattedDate = date?.toJSON()?.slice(2, 10);
-  // console.log(formattedDate)
 
   return (
     <View style={styles.card}>
@@ -27,19 +28,25 @@ export default function LeadCard({ name, relationShip, contactMedia, date = null
           <Svg style={styles.headerBg} width="100%" height="100%" viewBox="0 0 80 80" preserveAspectRatio="xMinYMin slice">
             <Defs>
               <LinearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
-                <Stop offset="0" stopColor="#171717" stopOpacity="1" />
-                <Stop offset="1" stopColor="#212121" stopOpacity="1" />
+                {/* <Stop offset="0" stopColor="#171717" stopOpacity="1" /> */}
+                {/* <Stop offset="1" stopColor="#212121" stopOpacity="1" /> */}
+                <Stop offset="0" stopColor="#E7E7E7" stopOpacity="1" />
+                <Stop offset="1" stopColor="#F8F8F8" stopOpacity="1" />
               </LinearGradient>
             </Defs>
             <Rect x="0" y="0" width="80" height="80" fill="url(#grad)"></Rect>
           </Svg>
-          <View style={styles.nameBox}>
-            <AntDesign style={ styles.icon } name="user" size={28} color="currentColor" />
-            <Text style={styles.title}>{ name }</Text>
-          </View>
-          <View style={styles.dateBox}>
-            <Feather style={ styles.dateIcon } name="calendar" size={18} color="currentColor" />
-            <Text style={styles.dateTitle}>{ formattedDate }</Text>
+          <View style={styles.contentBox}>
+            <View style={styles.nameBox}>
+              {leadsCount > 1 ?
+               <Feather style={ styles.icon } name="users" size={28} color="currentColor" /> :
+               <AntDesign style={ styles.icon } name="user" size={28} color="currentColor" /> }
+              <Text style={styles.title}>{ leadsCount > 1 ? `دعوة لـ(${leadsCount}) أشخاص` : name }</Text>
+            </View>
+            <View style={styles.dateBox}>
+              <Feather style={ styles.dateIcon } name="calendar" size={18} color="currentColor" />
+              <Text style={styles.dateTitle}>{ formattedDate }</Text>
+            </View>
           </View>
         </View>
         <View style={styles.content}>
@@ -64,14 +71,11 @@ const styles = StyleSheet.create({
   },
   header: {
     position: "relative",
-    flexDirection: "row",
-    paddingHorizontal: 18,
-    alignItems: "center",
-    height: 52,
-    justifyContent: "space-between",
   },
   headerBg: {
     flex: 1,
+    flexDirection: "row",
+    flexGrow: 2,
     width: "100%",
     height: "100%",
     maxHeight: 200,
@@ -80,19 +84,23 @@ const styles = StyleSheet.create({
     left: 0,
     zIndex: -1,
   },
+  contentBox: {
+    paddingHorizontal: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingTop: 14,
+    paddingBottom: 8,
+  },
   icon: {
     // color: "#888",// dark mood
     color: "#555",
-    // paddingTop: 14,
-    // paddingBottom: 8,
   },
   nameBox: {
     gap: 8,
     flexDirection: "row",
   },
   title: {
-    // paddingTop: 14,
-    // paddingBottom: 8,
     // color: "#9f9f9f",// dark mood
     color: "#333",
     fontSize: 19,
@@ -125,7 +133,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 6,
     // backgroundColor: "#999",// dark mood
-    backgroundColor: "#555",
+    backgroundColor: "#EfEfEf",
+    borderColor: "#DfDfDf",
+    borderWidth: 1,
     borderRadius: 10,
   },
   relation: {

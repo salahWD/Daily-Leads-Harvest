@@ -4,11 +4,18 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
+import { I18nManager } from 'react-native';
+
+// Enable RTL
+I18nManager.forceRTL(true);
+// If you want to mirror the layout for RTL
+I18nManager.allowRTL(true);
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -27,6 +34,7 @@ export default function RootLayout() {
     <ThemeProvider value={DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="addLead" options={{ title: "إضافة حالة إستقطاب" , headerTitle: "إضافة حالة إستقطاب" }}  />
         <Stack.Screen name="+not-found" />
       </Stack>
     </ThemeProvider>
