@@ -1,13 +1,18 @@
-import { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, Button, } from 'react-native';
+import { View, Text, StyleSheet, Button, TextInput } from 'react-native'
+import React, { useState } from 'react'
+
 import CustomDropdown, { Option } from '@/components/CustomDropdown';
-import { useRouter } from 'expo-router';
+import { Lead } from '@/utils/types';
 
-export default function NewLeadScreen() {
 
-  const router = useRouter();
+type LeadFormProps = {
+  // formInfo: Lead,
+  saveHandler(e: any): void,
+};
 
-  const [formInfo, setFormInfo] = useState({
+export default function LeadForm({ saveHandler }: LeadFormProps) {
+
+  const [formInfo, setFormInfo] = useState<Lead>({
     name: "",
     relationShip: 0,
     contactMedia: 0,
@@ -28,14 +33,8 @@ export default function NewLeadScreen() {
     { title: 'غير ذلك', value: 5 },
   ];
 
-  const handleSaveInfo = () => {
-    console.log(formInfo);
-    console.log(router)
-    router.back()
-  }
-
   return (
-    <View style={ styles.container }>
+    <View style={styles.modalContent}>
       <Text style={{ textAlign: "center", fontSize: 32, color: "#7d7d7d" }}>حالة الإستقطاب</Text>
       <View style={styles.form}>
         <View style={styles.formRow}>
@@ -56,27 +55,37 @@ export default function NewLeadScreen() {
           <CustomDropdown data={contactMedias} onSelect={(e) => {setFormInfo({...formInfo, contactMedia: e.value})}} defaultState={{title: "وسيلة الإستقطاب", value: formInfo.contactMedia}} />
         </View>
         <View style={{ ...styles.formRow, }}>
-          <Button title="حفظ الحالة" onPress={handleSaveInfo} />
+          <Button title="حفظ الحالة" onPress={() => saveHandler(formInfo)} />
         </View>
       </View>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
-  container: {
-    paddingTop: 30,
-    // backgroundColor: "#121212",// dark mood
-    backgroundColor: "#f5f5f5",
-    paddingHorizontal: 20,
-  }, 
+  modalContent: {
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    maxWidth: '95%',
+  },
+  option: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  optionText: {
+    fontSize: 16,
+    color: '#333',
+  },
+
+
   form: {
     gap: 24,
     marginTop: 24,
     paddingHorizontal: 15,
   }, 
   formRow: {
-    gap: 4,
     borderBottomColor: "#999",
     borderBottomWidth: 1,
   }, 
@@ -87,21 +96,5 @@ const styles = StyleSheet.create({
   input: {
     paddingVertical: 6,
     fontSize: 16,
-  },
-  
-  dropdownBox: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-  },
-  selectedValue: {
-    marginTop: 20,
-    fontSize: 18,
-    color: '#333',
   },
 });

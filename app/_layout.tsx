@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { I18nManager } from 'react-native';
+import HomeScreen from '@/app/(tabs)/index';
 
 // Enable RTL
 I18nManager.forceRTL(true);

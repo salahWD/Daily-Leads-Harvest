@@ -1,11 +1,16 @@
-import { StyleSheet, FlatList, ScrollView, View, Text, } from 'react-native';
+import { StyleSheet, FlatList, Button, TextInput, Keyboard, Modal, ScrollView, View, Text, Pressable, } from 'react-native';
+import { useEffect, useState } from 'react';
+import {  } from 'react-native'
+
 import LeadCard from '@/components/LeadCard';
 import FloatBtn from '@/components/FloatBtn';
-import { useEffect, useState } from 'react';
+import LeadForm from '@/components/LeadForm';
+import { Lead } from '@/utils/types';
 
 export default function HomeScreen() {
 
-  const [leads, setLeads] = useState([
+  const [visible, setVisible] = useState(false);
+  const [leads, setLeads] = useState<Array<Lead>>([
     {
       id: 1,
       leadsCount: 1,
@@ -32,6 +37,11 @@ export default function HomeScreen() {
     },
   ]);
 
+  const handleSaveInfo = (e: Lead) => {
+    setLeads([...leads, e])
+    setVisible(false);
+  }
+
   return (
     <>
       <ScrollView style={styles.container}>
@@ -47,7 +57,29 @@ export default function HomeScreen() {
           );
         })}
       </ScrollView>
-      <FloatBtn icon="adduser" />
+      <FloatBtn icon="adduser" handler={() => {setVisible(!visible)}}/>
+      
+      <Modal
+        transparent={true}
+        animationType="fade"
+        visible={visible}
+        onRequestClose={() => setVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={(e) => {
+            setVisible(false);
+          }}
+        >
+          <Pressable onPress={e => {
+            Keyboard.dismiss();
+            e.stopPropagation();
+          }}>
+            <LeadForm saveHandler={handleSaveInfo} />
+          </Pressable>
+        </Pressable>
+      </Modal>
+      
     </>
   );
 }
@@ -66,4 +98,22 @@ const styles = StyleSheet.create({
     // color: "#aaa", // dark mood
     color: "#333",
   },
+  dropdown: {
+    padding: 12,
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: '#ccc',
+    backgroundColor: '#fff',
+  },
+  selectedText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  
 });

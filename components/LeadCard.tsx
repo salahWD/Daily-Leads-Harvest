@@ -8,16 +8,9 @@ import Svg, {
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
 
-export type LeadCardProps = {
-  id?: number,
-  leadsCount?: number,
-  name?: string,
-  relationShip?: string,
-  contactMedia?: string,
-  date: Date | null,
-}
+import { Lead } from '@/utils/types';
 
-export default function LeadCard({ name, relationShip, contactMedia, leadsCount = 1, date = null }: LeadCardProps) {
+export default function LeadCard({ name, relationShip, contactMedia, leadsCount = 1, date = undefined }: Lead) {
 
   const formattedDate = date?.toJSON()?.slice(2, 10);
 
