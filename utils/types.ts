@@ -1,8 +1,8 @@
 export type Lead = {
-  id?: number | undefined,
+  id?: string,
   name: string,
-  relationShip?: number | string | undefined,
-  contactMedia?: number | string | undefined,
-  leadsCount?: number | undefined,
-  date?: Date | undefined,
+  relationShip?: number,
+  contactMedia?: number,
+  leadsCount?: number,
+  date?: Date,
 };

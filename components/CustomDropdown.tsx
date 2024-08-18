@@ -10,7 +10,7 @@ import {
 
 export type Option = {
   title: string,
-  value: number
+  value: number | undefined
 };
 
 export type CustomDropdownProps = {
@@ -53,7 +53,7 @@ const CustomDropdown = ({ data, onSelect, defaultState = {title: "", value: 0} }
           <View style={styles.modalContent}>
             <FlatList
               data={data}
-              keyExtractor={(item) => item.value.toString()}
+              keyExtractor={(item, index) => item.value?.toString() ?? index.toString()}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.option}

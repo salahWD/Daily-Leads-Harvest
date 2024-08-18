@@ -8,6 +8,7 @@ import Svg, {
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
 
+import { contactMediaTypes, relationShipTypes } from '@/utils/valueLists';
 import { Lead } from '@/utils/types';
 
 export default function LeadCard({ name, relationShip, contactMedia, leadsCount = 1, date = undefined }: Lead) {
@@ -43,8 +44,8 @@ export default function LeadCard({ name, relationShip, contactMedia, leadsCount 
           </View>
         </View>
         <View style={styles.content}>
-          <Text style={{ ...styles.relation, ...styles.badge }}>{ relationShip }</Text>
-          <Text style={{ ...styles.media, ...styles.badge }}>{ contactMedia }</Text>
+          <Text style={{ ...styles.relation, ...styles.badge }}>{ relationShip != undefined ? relationShipTypes[relationShip - 1].title : "غير معروف" }</Text>
+          <Text style={{ ...styles.media, ...styles.badge }}>{ contactMedia != undefined ? contactMediaTypes[contactMedia - 1].title : "غير معروف" }</Text>
         </View>
       </View>
     </View>

@@ -1,6 +1,9 @@
 import { StyleSheet, FlatList, Button, TextInput, Keyboard, Modal, ScrollView, View, Text, Pressable, } from 'react-native';
 import { useEffect, useState } from 'react';
-import {  } from 'react-native'
+
+import { db } from '@/firebaseConfig'; // Adjust the path as necessary
+import { collection, getDocs, addDoc } from 'firebase/firestore';
+
 
 import LeadCard from '@/components/LeadCard';
 import FloatBtn from '@/components/FloatBtn';
@@ -10,36 +13,49 @@ import { Lead } from '@/utils/types';
 export default function HomeScreen() {
 
   const [visible, setVisible] = useState(false);
-  const [leads, setLeads] = useState<Array<Lead>>([
-    {
-      id: 1,
-      leadsCount: 1,
-      name: "أحمد",
-      relationShip: "friend",
-      contactMedia: "1 to 1 meeting",
-      date: new Date(),
-    },
-    {
-      id: 2,
-      leadsCount: 3,
-      name: "خالد",
-      relationShip: "family member",
-      contactMedia: "1 to 1 meeting",
-      date: new Date(),
-    },
-    {
-      id: 3,
-      leadsCount: 1,
-      name: "جمال",
-      relationShip: "neighbour",
-      contactMedia: "phone call",
-      date: new Date(),
-    },
-  ]);
+  const [leads, setLeads] = useState<Array<Lead>>([]);
 
-  const handleSaveInfo = (e: Lead) => {
-    setLeads([...leads, e])
-    setVisible(false);
+  useEffect(() => {
+
+    const getTodayLeads = async () => {
+      try {
+  
+        const querySnapshot = await getDocs(collection(db, "Leads"));
+        const leadsList: Array<Lead> = [];
+  
+        querySnapshot.forEach((doc: any) => {
+          // console.log("item =>", doc.data())
+          const dbLeadInfo = doc.data();
+          leadsList.push({
+            id: doc.id,
+            ...dbLeadInfo,
+            date: new Date(dbLeadInfo.date.seconds * 1000 + dbLeadInfo.date.nanoseconds / 1000000),
+          });
+        });
+        setLeads(leadsList);
+      } catch (e) {
+        console.error("Error fetching documents: ", e);
+      }
+    }
+
+    getTodayLeads();
+    
+  }, []);
+
+  const handleSaveInfo = async (lead: Lead) => {
+    try {
+      // Reference to your collection
+      const docRef = await addDoc(collection(db, "Leads"), {
+        ...lead,
+        date: new Date(),
+      });
+      console.log("Document written with ID: ", docRef.id);
+      setLeads([...leads, lead])
+      setVisible(false);
+    } catch (err) {
+      alert("error adding lead: " + err)
+      console.error("Error adding document: ", err);
+    }
   }
 
   return (
