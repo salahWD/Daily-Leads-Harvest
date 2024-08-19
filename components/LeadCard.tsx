@@ -44,8 +44,22 @@ export default function LeadCard({ name, relationShip, contactMedia, leadsCount 
           </View>
         </View>
         <View style={styles.content}>
-          <Text style={{ ...styles.relation, ...styles.badge }}>{ relationShip != undefined ? relationShipTypes[relationShip - 1].title : "غير معروف" }</Text>
-          <Text style={{ ...styles.media, ...styles.badge }}>{ contactMedia != undefined ? contactMediaTypes[contactMedia - 1].title : "غير معروف" }</Text>
+          <View style={{flexDirection: "row", alignItems: "center"}}>
+            <Text>العلاقة: </Text>
+            <Text style={{ ...styles.relation, ...styles.badge }}>
+              { (relationShip != undefined && relationShipTypes != null && relationShipTypes[relationShip]?.title)
+              ? relationShipTypes[relationShip].title
+                : "غير معروف" }
+            </Text>
+          </View>
+          <View style={{flexDirection: "row", alignItems: "center"}}>
+            <Text>الوسيلة: </Text>
+            <Text style={{ ...styles.media, ...styles.badge }}>
+              { (contactMedia != undefined && relationShipTypes != null && relationShipTypes[contactMedia]?.title)
+              ? contactMediaTypes[contactMedia].title
+                : "غير معروف" }
+            </Text>
+          </View>
         </View>
       </View>
     </View>

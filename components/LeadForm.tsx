@@ -31,15 +31,15 @@ export default function LeadForm({ saveHandler }: LeadFormProps) {
             placeholder="الاسم الكامل"
           />
         </View>
-        <View style={styles.formRow}>
+        <View>
           <Text style={styles.label}>العلاقة مع المستقطَب</Text>
           <CustomDropdown data={contactMediaTypes} onSelect={(e) => {setFormInfo({...formInfo, relationShip: e.value})}} defaultState={{title: "إختر علاقة", value: formInfo.relationShip}} />
         </View>
-        <View style={{ ...styles.formRow, }}>
+        <View>
           <Text style={styles.label}>وسيلة التواصل مع المستقطَب</Text>
           <CustomDropdown data={relationShipTypes} onSelect={(e) => {setFormInfo({...formInfo, contactMedia: e.value})}} defaultState={{title: "وسيلة الإستقطاب", value: formInfo.contactMedia}} />
         </View>
-        <View style={{ ...styles.formRow, }}>
+        <View style={{ marginBottom: 8, }}>
           <Button title="حفظ الحالة" onPress={() => saveHandler(formInfo)} />
         </View>
       </View>
@@ -64,13 +64,13 @@ const styles = StyleSheet.create({
     color: '#333',
   },
 
-
   form: {
-    gap: 24,
+    gap: 8,
     marginTop: 24,
     paddingHorizontal: 15,
   }, 
   formRow: {
+    marginBottom: 12,
     borderBottomColor: "#999",
     borderBottomWidth: 1,
   }, 

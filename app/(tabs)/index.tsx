@@ -2,13 +2,13 @@ import { StyleSheet, FlatList, Button, TextInput, Keyboard, Modal, ScrollView, V
 import { useEffect, useState } from 'react';
 
 import { db } from '@/firebaseConfig'; // Adjust the path as necessary
-import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
 
-
+import AntDesign from '@expo/vector-icons/AntDesign';
 import LeadCard from '@/components/LeadCard';
-import FloatBtn from '@/components/FloatBtn';
 import LeadForm from '@/components/LeadForm';
 import { Lead } from '@/utils/types';
+import CustomBtn from '@/components/CustomBtn';
 
 export default function HomeScreen() {
 
@@ -18,20 +18,32 @@ export default function HomeScreen() {
   useEffect(() => {
 
     const getTodayLeads = async () => {
+      
       try {
-  
-        const querySnapshot = await getDocs(collection(db, "Leads"));
+        
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
+
+        const querySnapshot = await getDocs(
+          query(
+            collection(db, "Leads"),
+            where("date", ">=", startOfToday)
+          )
+        );
+
         const leadsList: Array<Lead> = [];
   
-        querySnapshot.forEach((doc: any) => {
-          // console.log("item =>", doc.data())
-          const dbLeadInfo = doc.data();
-          leadsList.push({
-            id: doc.id,
-            ...dbLeadInfo,
-            date: new Date(dbLeadInfo.date.seconds * 1000 + dbLeadInfo.date.nanoseconds / 1000000),
+        if (querySnapshot.docs && querySnapshot.docs.length > 0) {
+          querySnapshot.docs.forEach((doc: any) => {
+            const dbLeadInfo = doc.data();
+            leadsList.push({
+              id: doc.id,
+              ...dbLeadInfo,
+              date: new Date(dbLeadInfo.date.seconds * 1000 + dbLeadInfo.date.nanoseconds / 1000000),
+            });
           });
-        });
+        }
+
         setLeads(leadsList);
       } catch (e) {
         console.error("Error fetching documents: ", e);
@@ -44,14 +56,21 @@ export default function HomeScreen() {
 
   const handleSaveInfo = async (lead: Lead) => {
     try {
-      // Reference to your collection
-      const docRef = await addDoc(collection(db, "Leads"), {
-        ...lead,
-        date: new Date(),
-      });
-      console.log("Document written with ID: ", docRef.id);
-      setLeads([...leads, lead])
-      setVisible(false);
+      if (lead.name) {
+        const docRef = await addDoc(collection(db, "Leads"), {
+          ...lead,
+          contactMedia: lead.contactMedia != undefined && lead.contactMedia > 0 ? lead.contactMedia - 1 : 0,
+          relationShip: lead.relationShip != undefined && lead.relationShip > 0 ? lead.relationShip - 1 : 0,
+          date: new Date(),
+        });
+        console.log("Document written with ID: ", docRef.id);
+        setLeads([...leads, lead])
+        setVisible(false);
+      }else {
+        setVisible(false);
+        alert("الاسم مطلوب, يرجى تعبئته بشكل صحيح!")
+        console.error("the lead name is required")
+      }
     } catch (err) {
       alert("error adding lead: " + err)
       console.error("Error adding document: ", err);
@@ -60,21 +79,29 @@ export default function HomeScreen() {
 
   return (
     <>
-      <ScrollView style={styles.container}>
-        <Text style={styles.title}>Today Leads:</Text>
-        {leads.map((lead, index) => {
-          return (
-            <LeadCard key={index}
-            name={lead.name}
-            leadsCount={lead.leadsCount}
-            relationShip={lead.relationShip}
-            contactMedia={lead.contactMedia}
-            date={lead.date} />
-          );
-        })}
-      </ScrollView>
-      <FloatBtn icon="adduser" handler={() => {setVisible(!visible)}}/>
-      
+      <View style={{ flex: 1 }}>
+        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 30, paddingTop: 50, }}>
+          <Text style={styles.title}>حالات الإستقطاب اليومية:</Text>
+          {leads.map((lead, index) => {
+            return (
+              <LeadCard key={index}
+              name={lead.name}
+              leadsCount={lead.leadsCount}
+              relationShip={lead.relationShip}
+              contactMedia={lead.contactMedia}
+              date={lead.date} />
+            );
+          })}
+          <CustomBtn withBg={true} customStyle={{ borderStyle: "dashed", borderWidth: 1, borderColor: "gray" }}  handler={() => {setVisible(!visible)}}>
+            <AntDesign style={{ color: "gray", }} name={"adduser"} size={35} color="currentColor" />
+            <Text style={{ color: "gray", fontSize: 18, marginTop: 10 }}>
+              إضافة حالة إستقطاب
+            </Text>
+          </CustomBtn>
+        </ScrollView>
+      </View>
+
+      {/* <FloatBtn icon="adduser" handler={() => {setVisible(!visible)}}/> */}
       <Modal
         transparent={true}
         animationType="fade"
@@ -95,18 +122,16 @@ export default function HomeScreen() {
           </Pressable>
         </Pressable>
       </Modal>
-      
     </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 50,
     // backgroundColor: "#121212",// dark mood
+    paddingHorizontal: 20,
     backgroundColor: "#f5f5f5",
     flex: 1,
-    paddingHorizontal: 20,
   }, 
   title: {
     fontSize: 26,
