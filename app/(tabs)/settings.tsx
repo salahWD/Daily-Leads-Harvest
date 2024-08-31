@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { Colors } from "@/constants/Colors"
 import { LineChart, XAxis, Grid } from 'react-native-svg-charts'
 
+import Card from "@/components/Card"
+
 export default function SettingsScreen() {
 
   const data = [50, 10, 40, 95, -4, -24, 85, 91, 35, 50, 10, 40, 95, -4, -24, 85, 91, 35, 53, -53, 24, 50, -20, -80]
@@ -16,7 +18,7 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView>
-      <View style={{ ...styles.container, paddingTop: 50 }}>
+      <View style={{ ...styles.container }}>
         <Text style={styles.title}>أعداد المستقطبين اخر 30 يوماً</Text>
       </View>
       <ScrollView horizontal={true} >
@@ -40,7 +42,16 @@ export default function SettingsScreen() {
             />
         </View>
       </ScrollView>
-      <View style={styles.container}>
+      <View style={{ ...styles.container, ...styles.analiticsSection, }}>
+        <Text style={styles.title}>مراجعات الأداء</Text>
+        <View style={{ flexDirection: "row", gap: 5, }} >
+          <Card>
+            <Text>Hi there</Text>
+          </Card>
+          <Card>
+            <Text>Hi there</Text>
+          </Card>
+        </View>
       </View>
     </ScrollView>
   );
@@ -52,8 +63,18 @@ const styles = StyleSheet.create({
   container: {
     // backgroundColor: "#121212",// dark mood
     paddingHorizontal: 20,
+    paddingTop: 50,
     backgroundColor: "#f5f5f5",
     flex: 1,
+  },
+  analiticsSection: {
+    paddingTop: 25,
+    paddingBottom: 15,
+    borderTopColor: "#999",
+    borderTopWidth: 1,
+    flex: 1,
+    elevation: 5,
+    marginTop: 30,
   }, 
   title: {
     fontSize: 26,
