@@ -7,15 +7,16 @@ import { contactMediaTypes, relationShipTypes } from '@/utils/valueLists';
 
 type LeadFormProps = {
   // formInfo: Lead,
-  saveHandler(e: any): void,
+  saveHandler(info: Lead, isEdit: undefined | string): void,
+  info?: Lead,
 };
 
-export default function LeadForm({ saveHandler }: LeadFormProps) {
+export default function LeadForm({ saveHandler, info }: LeadFormProps) {
 
   const [formInfo, setFormInfo] = useState<Lead>({
-    name: "",
-    relationShip: 0,
-    contactMedia: 0,
+    name: info?.name ?? "",
+    relationShip: info?.relationShip ?? 0,
+    contactMedia: info?.contactMedia ?? 0,
   });
 
   return (
@@ -32,15 +33,32 @@ export default function LeadForm({ saveHandler }: LeadFormProps) {
           />
         </View>
         <View>
-          <Text style={styles.label}>العلاقة مع المستقطَب</Text>
-          <CustomDropdown data={contactMediaTypes} onSelect={(e) => {setFormInfo({...formInfo, relationShip: e.value})}} defaultState={{title: "إختر علاقة", value: formInfo.relationShip}} />
+          <Text style={styles.label}>وسيلة التواصل مع المستقطَب</Text>
+          <CustomDropdown
+            data={relationShipTypes}
+            onSelect={(e) => {
+              setFormInfo({...formInfo, relationShip: e.value})
+            }}
+            defaultState={{
+              title: formInfo.relationShip != undefined && formInfo.relationShip >= 0 ? relationShipTypes[formInfo.relationShip].title: "وسيلة الإستقطاب",
+              value: formInfo.relationShip
+            }}
+          />
         </View>
         <View>
-          <Text style={styles.label}>وسيلة التواصل مع المستقطَب</Text>
-          <CustomDropdown data={relationShipTypes} onSelect={(e) => {setFormInfo({...formInfo, contactMedia: e.value})}} defaultState={{title: "وسيلة الإستقطاب", value: formInfo.contactMedia}} />
+          <Text style={styles.label}>العلاقة مع المستقطَب</Text>
+          <CustomDropdown
+            data={contactMediaTypes}
+            onSelect={(e) => {
+              setFormInfo({...formInfo, contactMedia: e.value})
+            }}
+            defaultState={{
+              title: formInfo.contactMedia != undefined && formInfo.contactMedia >= 0 ? contactMediaTypes[formInfo.contactMedia].title: "إختر علاقة",
+              value: formInfo.contactMedia}
+            } />
         </View>
         <View style={{ marginBottom: 8, }}>
-          <Button title="حفظ الحالة" onPress={() => saveHandler(formInfo)} />
+          <Button title="حفظ الحالة" onPress={() => saveHandler(formInfo, info?.id)} />
         </View>
       </View>
     </View>

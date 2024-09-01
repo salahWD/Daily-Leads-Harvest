@@ -35,7 +35,7 @@ const CustomDropdown = ({ data, onSelect, defaultState = {title: "", value: 0} }
         style={styles.dropdown}
         onPress={() => setVisible(true)}
       >
-        <Text style={{ ...styles.selectedText, color: selectedValue.value == 0 ? "#999": "#333" }}>
+        <Text style={{ ...styles.selectedText, color: selectedValue.value == undefined ? "#999": "#333" }}>
           {selectedValue ? selectedValue.title : 'إختر خياراً'}
         </Text>
       </TouchableOpacity>

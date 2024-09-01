@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, } from 'react-native';
+import { StyleSheet, View, Text, Pressable, } from 'react-native';
 import Svg, {
   Rect,
   Defs,
@@ -11,58 +11,64 @@ import Feather from '@expo/vector-icons/Feather';
 import { contactMediaTypes, relationShipTypes } from '@/utils/valueLists';
 import { Lead } from '@/utils/types';
 
-export default function LeadCard({ name, relationShip, contactMedia, leadsCount = 1, date = undefined }: Lead) {
+type LeadCardProps = {
+  handler?(e: any): void,
+}
+
+export default function LeadCard({ name, relationShip, contactMedia, leadsCount = 1, date = undefined, handler }: Lead & LeadCardProps) {
 
   const formattedDate = date?.toJSON()?.slice(2, 10);
 
   return (
-    <View style={styles.card}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Svg style={styles.headerBg} width="100%" height="100%" viewBox="0 0 80 80" preserveAspectRatio="xMinYMin slice">
-            <Defs>
-              <LinearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
-                {/* <Stop offset="0" stopColor="#171717" stopOpacity="1" /> */}
-                {/* <Stop offset="1" stopColor="#212121" stopOpacity="1" /> */}
-                <Stop offset="0" stopColor="#E7E7E7" stopOpacity="1" />
-                <Stop offset="1" stopColor="#F8F8F8" stopOpacity="1" />
-              </LinearGradient>
-            </Defs>
-            <Rect x="0" y="0" width="80" height="80" fill="url(#grad)"></Rect>
-          </Svg>
-          <View style={styles.contentBox}>
-            <View style={styles.nameBox}>
-              {leadsCount > 1 ?
-               <Feather style={ styles.icon } name="users" size={28} color="currentColor" /> :
-               <AntDesign style={ styles.icon } name="user" size={28} color="currentColor" /> }
-              <Text style={styles.title}>{ leadsCount > 1 ? `دعوة لـ(${leadsCount}) أشخاص` : name }</Text>
-            </View>
-            <View style={styles.dateBox}>
-              <Feather style={ styles.dateIcon } name="calendar" size={18} color="currentColor" />
-              <Text style={styles.dateTitle}>{ formattedDate }</Text>
+    <Pressable onPress={handler}>
+      <View style={styles.card}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Svg style={styles.headerBg} width="100%" height="100%" viewBox="0 0 80 80" preserveAspectRatio="xMinYMin slice">
+              <Defs>
+                <LinearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
+                  {/* <Stop offset="0" stopColor="#171717" stopOpacity="1" /> */}
+                  {/* <Stop offset="1" stopColor="#212121" stopOpacity="1" /> */}
+                  <Stop offset="0" stopColor="#E7E7E7" stopOpacity="1" />
+                  <Stop offset="1" stopColor="#F8F8F8" stopOpacity="1" />
+                </LinearGradient>
+              </Defs>
+              <Rect x="0" y="0" width="80" height="80" fill="url(#grad)"></Rect>
+            </Svg>
+            <View style={styles.contentBox}>
+              <View style={styles.nameBox}>
+                {leadsCount > 1 ?
+                <Feather style={ styles.icon } name="users" size={28} color="currentColor" /> :
+                <AntDesign style={ styles.icon } name="user" size={28} color="currentColor" /> }
+                <Text style={styles.title}>{ leadsCount > 1 ? `دعوة لـ(${leadsCount}) أشخاص` : name }</Text>
+              </View>
+              <View style={styles.dateBox}>
+                <Feather style={ styles.dateIcon } name="calendar" size={18} color="currentColor" />
+                <Text style={styles.dateTitle}>{ formattedDate }</Text>
+              </View>
             </View>
           </View>
-        </View>
-        <View style={styles.content}>
-          <View style={{flexDirection: "row", alignItems: "center"}}>
-            <Text>العلاقة: </Text>
-            <Text style={{ ...styles.relation, ...styles.badge }}>
-              { (relationShip != undefined && relationShipTypes != null && relationShipTypes[relationShip]?.title)
-              ? relationShipTypes[relationShip].title
-                : "غير معروف" }
-            </Text>
-          </View>
-          <View style={{flexDirection: "row", alignItems: "center"}}>
-            <Text>الوسيلة: </Text>
-            <Text style={{ ...styles.media, ...styles.badge }}>
-              { (contactMedia != undefined && relationShipTypes != null && relationShipTypes[contactMedia]?.title)
-              ? contactMediaTypes[contactMedia].title
-                : "غير معروف" }
-            </Text>
+          <View style={styles.content}>
+            <View style={{flexDirection: "row", alignItems: "center"}}>
+              <Text>العلاقة: </Text>
+              <Text style={{ ...styles.relation, ...styles.badge }}>
+                { (relationShip != undefined && relationShipTypes != null && relationShipTypes[relationShip]?.title)
+                ? relationShipTypes[relationShip].title
+                  : "غير معروف" }
+              </Text>
+            </View>
+            <View style={{flexDirection: "row", alignItems: "center"}}>
+              <Text>الوسيلة: </Text>
+              <Text style={{ ...styles.media, ...styles.badge }}>
+                { (contactMedia != undefined && relationShipTypes != null && relationShipTypes[contactMedia]?.title)
+                ? contactMediaTypes[contactMedia].title
+                  : "غير معروف" }
+              </Text>
+            </View>
           </View>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

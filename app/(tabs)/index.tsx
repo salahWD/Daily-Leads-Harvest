@@ -1,8 +1,9 @@
 import { StyleSheet, FlatList, Button, TextInput, Keyboard, Modal, ScrollView, View, Text, Pressable, } from 'react-native';
 import { useEffect, useState } from 'react';
+import { router } from 'expo-router';
 
 import { db } from '@/firebaseConfig'; // Adjust the path as necessary
-import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, addDoc, updateDoc, doc } from "firebase/firestore";
 
 import AntDesign from '@expo/vector-icons/AntDesign';
 import LeadCard from '@/components/LeadCard';
@@ -12,6 +13,7 @@ import CustomBtn from '@/components/CustomBtn';
 
 export default function HomeScreen() {
 
+  const [editStatus, setEditStatus] = useState<Lead | undefined>(undefined);
   const [visible, setVisible] = useState(false);
   const [leads, setLeads] = useState<Array<Lead>>([]);
 
@@ -54,26 +56,55 @@ export default function HomeScreen() {
     
   }, []);
 
-  const handleSaveInfo = async (lead: Lead) => {
-    try {
-      if (lead.name) {
-        const docRef = await addDoc(collection(db, "Leads"), {
-          ...lead,
-          contactMedia: lead.contactMedia != undefined && lead.contactMedia > 0 ? lead.contactMedia - 1 : 0,
-          relationShip: lead.relationShip != undefined && lead.relationShip > 0 ? lead.relationShip - 1 : 0,
-          date: new Date(),
-        });
-        console.log("Document written with ID: ", docRef.id);
-        setLeads([...leads, lead])
-        setVisible(false);
-      }else {
-        setVisible(false);
-        alert("الاسم مطلوب, يرجى تعبئته بشكل صحيح!")
-        console.error("the lead name is required")
+  const handleSaveInfo = async (lead: Lead, leadId: string | undefined) => {
+    if (leadId) {// edit an existing lead
+      try {
+        if (lead.name) {
+          const leadRef = doc(db, "Leads", leadId); // Replace leadId with the actual ID of the lead you want to edit
+          await updateDoc(leadRef, {
+            ...lead,
+            contactMedia: lead.contactMedia != undefined && lead.contactMedia >= 0 ? lead.contactMedia : 0,
+            relationShip: lead.relationShip != undefined && lead.relationShip >= 0 ? lead.relationShip : 0,
+            date: new Date(),
+          });
+          console.log("Document updated with ID: ", leadId);
+          
+          setLeads(leads.map(l => l.id === leadId ? lead : l));
+          setVisible(false);
+          setEditStatus(undefined)
+        } else {
+          setVisible(false);
+          setEditStatus(undefined)
+          alert("الاسم مطلوب, يرجى تعبئته بشكل صحيح!")
+          console.error("the lead name is required");
+        }
+      } catch (err) {
+        alert("error updating lead: " + err);
+        console.error("Error updating document: ", err);
       }
-    } catch (err) {
-      alert("error adding lead: " + err)
-      console.error("Error adding document: ", err);
+    }else {// add new lead
+      try {
+        if (lead.name) {
+          const docRef = await addDoc(collection(db, "Leads"), {
+            ...lead,
+            contactMedia: lead.contactMedia != undefined && lead.contactMedia >= 0 ? lead.contactMedia : 0,
+            relationShip: lead.relationShip != undefined && lead.relationShip >= 0 ? lead.relationShip : 0,
+            date: new Date(),
+          });
+          console.log("Document written with ID: ", docRef.id);
+          setLeads([...leads, lead])
+          setVisible(false);
+          setEditStatus(undefined)
+        }else {
+          setVisible(false);
+          setEditStatus(undefined)
+          alert("الاسم مطلوب, يرجى تعبئته بشكل صحيح!")
+          console.error("the lead name is required")
+        }
+      } catch (err) {
+        alert("error adding lead: " + err)
+        console.error("Error adding document: ", err);
+      }
     }
   }
 
@@ -89,14 +120,28 @@ export default function HomeScreen() {
               leadsCount={lead.leadsCount}
               relationShip={lead.relationShip}
               contactMedia={lead.contactMedia}
+              handler={(e) => {
+                setVisible(true)
+                setEditStatus(lead)
+              }}
               date={lead.date} />
             );
           })}
-          <CustomBtn withBg={true} customStyle={{ borderStyle: "dashed", borderWidth: 1, borderColor: "gray" }}  handler={() => {setVisible(!visible)}}>
-            <AntDesign style={{ color: "gray", }} name={"adduser"} size={35} color="currentColor" />
-            <Text style={{ color: "gray", fontSize: 18, marginTop: 10 }}>
-              إضافة حالة إستقطاب
-            </Text>
+          <CustomBtn
+            withBg={true}
+            customStyle={{
+              borderStyle: "dashed",
+              borderWidth: 1,
+              borderColor: "gray",
+            }}
+            handler={() => {
+              // setVisible(!visible)
+              router.replace('/login');
+            }}>
+              <AntDesign style={{ color: "gray", }} name={"adduser"} size={35} color="currentColor" />
+              <Text style={{ color: "gray", fontSize: 18, marginTop: 10 }}>
+                إضافة حالة إستقطاب
+              </Text>
           </CustomBtn>
         </ScrollView>
       </View>
@@ -106,19 +151,23 @@ export default function HomeScreen() {
         transparent={true}
         animationType="fade"
         visible={visible}
-        onRequestClose={() => setVisible(false)}
+        onRequestClose={() => {
+          setVisible(false)
+          setEditStatus(undefined)
+        }}
       >
         <Pressable
           style={styles.modalOverlay}
           onPress={(e) => {
             setVisible(false);
+            setEditStatus(undefined)
           }}
         >
           <Pressable onPress={e => {
             Keyboard.dismiss();
             e.stopPropagation();
           }}>
-            <LeadForm saveHandler={handleSaveInfo} />
+            <LeadForm saveHandler={handleSaveInfo} info={editStatus} />
           </Pressable>
         </Pressable>
       </Modal>

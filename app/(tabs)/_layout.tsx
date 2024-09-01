@@ -4,38 +4,38 @@ import { Stack } from 'expo-router/stack';
 import React from 'react';
 
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+
 import { Colors } from '@/constants/Colors';
 
 export default function TabLayout() {
 
   return (
-    <>
-      <Tabs
-        screenOptions={{
-          tabBarActiveTintColor: Colors['light'].tint,
-          headerShown: false,
-        }}>
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: 'Home',
-            tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
-            ),
-            tabBarLabelStyle: { paddingBottom: 5}
-          }}
-        />
-        <Tabs.Screen
-          name="settings"
-          options={{
-            title: 'Settings',
-            tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon name={focused ? 'settings' : 'settings-outline'} color={color} />
-            ),
-            tabBarLabelStyle: { paddingBottom: 5}
-          }}
-        />
-      </Tabs>
-    </>
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: Colors['light'].tint,
+        headerShown: false,
+      }}>
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+          ),
+          tabBarLabelStyle: { paddingBottom: 5}
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Settings',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'settings' : 'settings-outline'} color={color} />
+          ),
+          tabBarLabelStyle: { paddingBottom: 5}
+        }}
+      />
+    </Tabs>
   );
 }

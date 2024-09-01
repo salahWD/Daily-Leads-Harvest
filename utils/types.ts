@@ -6,3 +6,12 @@ export type Lead = {
   leadsCount?: number,
   date?: Date,
 };
+
+export type User = {
+  dxnId: string,
+  name: string,
+  phone: string,
+  uplineName: string,
+  password: string,
+  createdAt?: Date,
+};
