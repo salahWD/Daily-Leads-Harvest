@@ -4,8 +4,11 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 import { I18nManager } from 'react-native';
-import HomeScreen from '@/app/(tabs)/index';
+
+import { getUserSession } from "@/utils/functions"
 
 // Enable RTL
 I18nManager.forceRTL(true);
@@ -26,6 +29,24 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+
+  useEffect(() => {
+    
+    async function checkUserState() {
+      const Id = await getUserSession();
+
+      if (Id) {
+        console.log('User is logged in:', Id);
+        router.replace('/(tabs)');
+        // You can retrieve user data from Firestore if needed
+      } else {
+        console.log('user should login');
+        router.replace('/login');
+      }
+    }
+
+    checkUserState();
+  }, []);
 
   if (!loaded) {
     return null;

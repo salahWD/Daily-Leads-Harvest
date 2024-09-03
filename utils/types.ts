@@ -4,6 +4,7 @@ export type Lead = {
   relationShip?: number,
   contactMedia?: number,
   leadsCount?: number,
+  dxnId?: string,
   date?: Date,
 };
 

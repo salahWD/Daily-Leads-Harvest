@@ -3,20 +3,19 @@ import React, { useState } from 'react'
 
 import CustomDropdown from '@/components/CustomDropdown';
 import { Lead } from '@/utils/types';
-import { contactMediaTypes, relationShipTypes } from '@/utils/valueLists';
+import { groupContactMediaTypes } from '@/utils/valueLists';
 
-type LeadFormProps = {
-  // formInfo: Lead,
+type GroupLeadFormProps = {
   saveHandler(info: Lead, isEdit: undefined | string): void,
   info?: Lead,
   pressHandler?(e: GestureResponderEvent): void,
 };
 
-export default function LeadForm({ saveHandler, info, pressHandler }: LeadFormProps) {
+export default function GroupLeadForm({ saveHandler, info, pressHandler }: GroupLeadFormProps) {
 
   const [formInfo, setFormInfo] = useState<Lead>({
-    name: info?.name ?? "",
-    relationShip: info?.relationShip ?? 0,
+    name: "استقطاب جماعي",
+    leadsCount: info?.leadsCount ?? 0,
     contactMedia: info?.contactMedia ?? 0,
   });
 
@@ -26,38 +25,31 @@ export default function LeadForm({ saveHandler, info, pressHandler }: LeadFormPr
         <Text style={{ textAlign: "center", fontSize: 32, color: "#7d7d7d" }}>حالة الإستقطاب</Text>
         <View style={styles.form}>
           <View style={styles.formRow}>
-            <Text style={styles.label}>إسم المستقطَب</Text>
+            <Text style={styles.label}>عدد المستقطبين</Text>
             <TextInput
               style={styles.input}
-              onChangeText={(e) => {setFormInfo({...formInfo, name: e})}}
-              value={formInfo.name}
-              placeholder="الاسم الكامل"
+              keyboardType='numeric'
+              onChangeText={(e) => {
+                setFormInfo({...formInfo, leadsCount: isNaN(parseInt(e)) ? 0 : parseInt(e)})
+              }}
+              value={(formInfo?.leadsCount && formInfo.leadsCount > 0) ? (isNaN(formInfo.leadsCount) ? "": formInfo.leadsCount.toString()): ""}
+              placeholder="عدد المستقطبين"
             />
           </View>
           <View>
-            <Text style={styles.label}>وسيلة التواصل مع المستقطَب</Text>
+            <Text style={styles.label}>وسيلة التواصل</Text>
             <CustomDropdown
-              data={relationShipTypes}
+              data={groupContactMediaTypes}
               onSelect={(e) => {
-                setFormInfo({...formInfo, relationShip: e.value})
-              }}
-              defaultState={{
-                title: formInfo.relationShip != undefined && formInfo.relationShip >= 0 ? relationShipTypes[formInfo.relationShip].title: "وسيلة الإستقطاب",
-                value: formInfo.relationShip
-              }}
-            />
-          </View>
-          <View>
-            <Text style={styles.label}>العلاقة مع المستقطَب</Text>
-            <CustomDropdown
-              data={contactMediaTypes}
-              onSelect={(e) => {
+                // setFormInfo({...formInfo, contactMedia: e.map(item => item.value)})
                 setFormInfo({...formInfo, contactMedia: e.value})
               }}
               defaultState={{
-                title: formInfo.contactMedia != undefined && formInfo.contactMedia >= 0 ? contactMediaTypes[formInfo.contactMedia].title: "إختر علاقة",
-                value: formInfo.contactMedia}
-              } />
+                title: formInfo.contactMedia != undefined && formInfo.contactMedia >= 0 ? groupContactMediaTypes[formInfo.contactMedia].title: "وسيلة الإستقطاب",
+                value: formInfo.contactMedia
+              }}
+              // multiSelect={true}
+            />
           </View>
           <View style={{ marginBottom: 8, }}>
             <Button title="حفظ الحالة" onPress={() => saveHandler(formInfo, info?.id)} />
@@ -74,6 +66,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 8,
     maxWidth: '80%',
+    width: "100%",
   },
   option: {
     padding: 15,
@@ -88,7 +81,6 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 24,
     paddingHorizontal: 15,
-    width: "100%",
   }, 
   formRow: {
     marginBottom: 12,

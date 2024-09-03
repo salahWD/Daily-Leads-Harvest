@@ -1,48 +1,17 @@
-import { StyleSheet, ScrollView, View, Text, Pressable, } from 'react-native';
+import { RefreshControl, StyleSheet, ScrollView, View, Text, } from 'react-native';
 import { useEffect, useState } from 'react';
 
-import { Colors } from "@/constants/Colors"
-import { LineChart, XAxis, Grid } from 'react-native-svg-charts'
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { LineChart, YAxis, XAxis, Grid } from 'react-native-svg-charts'
 
+import { Colors } from "@/constants/Colors"
 import Card from "@/components/Card"
 
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "@/firebaseConfig"; // Adjust the import based on your project structure
-
-
-/* const getCurrentMonthLeadsCount = async (userId) => {
-  try {
-    // Get the start of the current month
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-    // Query the leads for the current month
-    const leadsQuery = query(
-      collection(db, "Leads"),
-      where("date", ">=", startOfMonth),
-      where("userId", "==", userId) // Assuming you have user-specific data
-    );
-
-    const querySnapshot = await getDocs(leadsQuery);
-    const leadsCount = querySnapshot.size;
-
-    console.log(`Leads count for the current month: ${leadsCount}`);
-    return leadsCount;
-  } catch (err) {
-    console.error("Error getting leads count: ", err);
-    return 0;
-  }
-}; */
-
-// Example usage
-// const userId = "exampleUserId"; // Replace with the actual user ID
-// getCurrentMonthLeadsCount(userId);
-
+import { db } from "@/firebaseConfig"; 
+import { getUserSession } from "@/utils/functions"
 
 export default function SettingsScreen() {
-
-  const data = [50, 10, 40, 95, -4, -24, 85, 91, 35, 50, 10, 40, 95, -4, -24, 85, 91, 35, 53, -53, 24, 50, -20, -80]
 
   const LineDefaultProps = {
     isAnimationActive: false,
@@ -50,14 +19,144 @@ export default function SettingsScreen() {
     strokeWidth: 2,
   }
 
+  const getCurrentMonthLeadsCount = async (userId: string) => {
+    try {
+      
+      const now = new Date();
+      // const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      const dailyLeadsCount = new Array(daysInMonth).fill(0);
+
+      const leadsQuery = query(
+        collection(db, "Leads"),
+        where("date", ">=", startOfMonth),
+        where("userId", "==", userId)
+      );
+
+      const querySnapshot = await getDocs(leadsQuery);
+
+      const leadsCount = querySnapshot.size;
+      
+      querySnapshot.forEach(doc => {
+        const leadDate = doc.data().date.toDate(); // Convert Firestore timestamp to JS Date
+        const day = leadDate.getDate(); // Get the day of the month (1-31)
+        dailyLeadsCount[day - 1] += doc.data().leadsCount; // Increment the count for that day
+      });
+
+      console.log(`Leads count for the current month: ${leadsCount}`);
+      return {leadsCount: leadsCount, dailyLeadsCount: dailyLeadsCount};
+    } catch (err) {
+      console.error("Error getting leads count: ", err);
+      return {leadsCount: 0, dailyLeadsCount: []};
+    }
+  };
+
+  const getCurrentMonthMembersCount = async (userId: string) => {
+    try {
+      
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      const dailyMembersCount = new Array(daysInMonth).fill(0);
+
+      const membersQuery = query(
+        collection(db, "Members"),
+        where("date", ">=", startOfMonth),
+        where("userId", "==", userId)
+      );
+
+      const querySnapshot = await getDocs(membersQuery);
+
+      const membersCount = querySnapshot.size;
+      
+      querySnapshot.forEach(doc => {
+        const memberDate = doc.data().date.toDate(); // Convert Firestore timestamp to JS Date
+        const day = memberDate.getDate(); // Get the day of the month (1-31)
+        dailyMembersCount[day - 1] += 1; // Increment the count for that day
+      });
+
+      console.log(`Members count for the current month: ${membersCount}`);
+      return {membersCount: membersCount, dailyMembersCount: dailyMembersCount};
+    } catch (err) {
+      console.error("Error getting members count: ", err);
+      return {membersCount: 0, dailyMembersCount: []};
+    }
+  };
+
+  const [data, setData] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [leadsCount, setLeadsCount] = useState(0);
+  const [membersCount, setMembersCount] = useState(0);
+  const [dxnId, setDxnId] = useState("");
+
+  const refreshData = async (id: string) => {
+    const {leadsCount, dailyLeadsCount} = await getCurrentMonthLeadsCount(id);
+    const {membersCount} = await getCurrentMonthMembersCount(id);
+    setLeadsCount(leadsCount);
+    setData(dailyLeadsCount);
+    setMembersCount(membersCount);
+  }
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      // Perform your refresh logic here, e.g., fetch new data
+      console.log("Refreshing data...");
+      await refreshData(dxnId);
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+
+    async function init() {
+      const id = await getUserSession();
+      if (id) {
+        setDxnId(id)
+        await refreshData(id);
+      }else {
+        console.error("there is no dxn id");
+      }
+    }
+
+    init();
+
+  }, []);
+
+
   return (
-    <ScrollView>
+    <ScrollView
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+        />
+      }
+    >
       <View style={{ ...styles.container }}>
-        <Text style={styles.title}>أعداد المستقطبين اخر 30 يوماً</Text>
+        <Text style={styles.title}>أعداد المستقطبين هذا الشهر</Text>
       </View>
-      <ScrollView horizontal={true} >
-        <View style={{ height: 250, width: 600, paddingHorizontal: 18, }}>
-          <LineChart
+      <View style={{ height: 250, flexDirection: 'row', paddingHorizontal: 10 }}>
+        <YAxis
+          data={data}
+          contentInset={{ top: 15, bottom: 30 }}
+          // style={{ paddingTop: 30 }}
+          svg={{
+            fill: 'grey',
+            fontSize: 10,
+          }}
+          numberOfTicks={5}
+          {...LineDefaultProps}
+        />
+        <ScrollView horizontal={true} >
+          <View style={{ height: 250, width: 600, paddingHorizontal: 12 }}>
+            <LineChart
               style={{ flex: 1 }}
               data={data}
               gridMin={0}
@@ -65,7 +164,7 @@ export default function SettingsScreen() {
               svg={{ stroke: Colors.light.tint }}
               {...LineDefaultProps}
             >
-              <Grid />
+              <Grid {...LineDefaultProps} />
             </LineChart>
             <XAxis
               style={{ marginHorizontal: -10 }}
@@ -75,8 +174,9 @@ export default function SettingsScreen() {
               svg={{ fontSize: 10, fill: 'black' }}
               {...LineDefaultProps}
             />
-        </View>
-      </ScrollView>
+          </View>
+        </ScrollView>
+      </View>
       <View style={{ ...styles.container, ...styles.analiticsSection, }}>
         <Text style={styles.title}>مراجعات الأداء</Text>
         <View style={{ flexDirection: "row", gap: 5, }} >
@@ -94,16 +194,16 @@ export default function SettingsScreen() {
             <View style={{ flexDirection: 'row', alignItems: "center", gap: 8, paddingHorizontal: 8 }}>
               <AntDesign name="addusergroup" size={24} color="black" />
               <Text style={{ fontSize: 18, }}>
-                +{}
+                {leadsCount}
               </Text>
             </View>
           </Card>
           <Card>
-            <Text style={styles.cardLabel}>عدد الأعضاء</Text>
+            <Text style={styles.cardLabel}>عدد المسجلين</Text>
             <View style={{ flexDirection: 'row', alignItems: "center", gap: 8, paddingHorizontal: 8 }}>
               <AntDesign name="caretup" size={18} color={"green"} />
               <Text style={{ fontSize: 18, color: "green", }}>
-                +5%
+                +{membersCount}
               </Text>
             </View>
           </Card>

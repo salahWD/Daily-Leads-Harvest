@@ -14,3 +14,11 @@ export const relationShipTypes: Array<Option> = [
   { title: 'جار', value: 2 },
   { title: 'عن طريق الانترنت', value: 3 },
 ];
+
+export const groupContactMediaTypes: Array<Option> = [
+  { title: 'مجموعات الواتساب', value: 0 },
+  { title: 'مجموعات الفيسبوك', value: 1 },
+  { title: 'اصدقاء الفيسبوك', value: 2 },
+  { title: 'محاضرة عامة', value: 3 },
+  { title: 'اخرى', value: 4 },
+];

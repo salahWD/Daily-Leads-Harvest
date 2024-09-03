@@ -8,7 +8,7 @@ import Svg, {
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
 
-import { contactMediaTypes, relationShipTypes } from '@/utils/valueLists';
+import { groupContactMediaTypes, contactMediaTypes, relationShipTypes } from '@/utils/valueLists';
 import { Lead } from '@/utils/types';
 
 type LeadCardProps = {
@@ -17,7 +17,7 @@ type LeadCardProps = {
 
 export default function LeadCard({ name, relationShip, contactMedia, leadsCount = 1, date = undefined, handler }: Lead & LeadCardProps) {
 
-  const formattedDate = date?.toJSON()?.slice(2, 10);
+  const formattedDate = date ? date?.toJSON()?.slice(2, 10) : new Date().toJSON()?.slice(2, 10);
 
   return (
     <Pressable onPress={handler}>
@@ -49,20 +49,24 @@ export default function LeadCard({ name, relationShip, contactMedia, leadsCount 
             </View>
           </View>
           <View style={styles.content}>
-            <View style={{flexDirection: "row", alignItems: "center"}}>
-              <Text>العلاقة: </Text>
-              <Text style={{ ...styles.relation, ...styles.badge }}>
-                { (relationShip != undefined && relationShipTypes != null && relationShipTypes[relationShip]?.title)
-                ? relationShipTypes[relationShip].title
-                  : "غير معروف" }
-              </Text>
-            </View>
+            {leadsCount == 1 && (
+              <View style={{flexDirection: "row", alignItems: "center"}}>
+                <Text>العلاقة: </Text>
+                <Text style={{ ...styles.relation, ...styles.badge }}>
+                  { (relationShip != undefined && relationShipTypes != null && relationShipTypes[relationShip]?.title)
+                  ? relationShipTypes[relationShip].title
+                    : "غير معروف" }
+                </Text>
+              </View>
+            )}
             <View style={{flexDirection: "row", alignItems: "center"}}>
               <Text>الوسيلة: </Text>
               <Text style={{ ...styles.media, ...styles.badge }}>
-                { (contactMedia != undefined && relationShipTypes != null && relationShipTypes[contactMedia]?.title)
-                ? contactMediaTypes[contactMedia].title
-                  : "غير معروف" }
+                {
+                (leadsCount == 1 && contactMedia != undefined && relationShipTypes != null && relationShipTypes[contactMedia]?.title)
+                ? contactMediaTypes[contactMedia].title :
+                (leadsCount > 1 && contactMedia != undefined && groupContactMediaTypes != null && groupContactMediaTypes[contactMedia]?.title ? groupContactMediaTypes[contactMedia].title: "غير معروف")
+                }
               </Text>
             </View>
           </View>

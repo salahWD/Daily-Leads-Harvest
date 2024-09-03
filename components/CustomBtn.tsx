@@ -12,10 +12,10 @@ type CustomBtnProps = {
   customStyle?: {},
 };
 
-export default function LeadCard({ children, handler, customStyle, withBg=true }: React.PropsWithChildren<CustomBtnProps>) {
+export default function CustomBtn({ children, handler, customStyle, withBg=true }: React.PropsWithChildren<CustomBtnProps>) {
 
   return (
-    <Pressable onPress={handler}>
+    <Pressable onPress={handler} style={{ flex: 1, }}>
       <View style={{ ...styles.button, ...customStyle }}>
         {withBg == true ?
         <Svg style={ styles.buttonBg } width="100%" height="100%" viewBox="0 0 80 80" preserveAspectRatio="xMinYMin slice">
@@ -29,7 +29,7 @@ export default function LeadCard({ children, handler, customStyle, withBg=true }
           </Defs>
           <Rect x="0" y="0" width="80" height="80" fill="url(#grad)"></Rect>
         </Svg>: null}
-        <View style={{paddingVertical: 12,alignItems: "center", justifyContent: "center" }}>
+        <View style={{ paddingVertical: 12, alignItems: "center", justifyContent: "center" }}>
           {children}
         </View>
       </View>
@@ -43,6 +43,7 @@ const styles = StyleSheet.create({
     position: "relative",
     borderRadius: 25,
     overflow: "hidden",
+    width: "100%",
   },
   buttonBg: {
     flex: 1,

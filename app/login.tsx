@@ -3,45 +3,15 @@ import { KeyboardAvoidingView, ScrollView, StyleSheet, View, Text, TextInput, Bu
 import { db, FIREBASE_AUTH } from '@/firebaseConfig'; // Adjust the path as necessary
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { useState } from 'react';
-import { User } from '@/utils/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { router } from 'expo-router';
-import bcrypt from 'bcryptjs';
+import CryptoJS from 'crypto-js';
 
-async function registerUser({name, phone, dxnId, uplineName, password}: User) {
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const userDocRef = doc(db, 'Users', dxnId); // Using email as the document ID
 
-  await setDoc(userDocRef, {
-    name: name,
-    phone: phone,
-    dxnId: dxnId,
-    uplineName: uplineName,
-    password: hashedPassword,
-    createdAt: new Date(),
-  });
-
-  console.log('User registered successfully');
-}
-
-async function loginUser(dxnId: string, password: string ) {
-  const userDocRef = doc(db, 'Users', dxnId);
-  const userDoc = await getDoc(userDocRef);
-
-  if (userDoc.exists()) {
-    const userData = userDoc.data();
-    // const isPasswordCorrect = await bcrypt.compare(password, userData.password);
-    const isPasswordCorrect = await bcrypt.compare(await bcrypt.hash(password, 10), userData.password);
-
-    if (isPasswordCorrect) {
-      console.log('Login successful');
-      // Save user session data here
-    } else {
-      console.error('Invalid password');
-    }
-  } else {
-    console.error('No user found with this email');
-  }
+function verifyPassword(inputPassword: string, storedHashedPassword: string) {
+  const hashedInputPassword = CryptoJS.SHA256(inputPassword).toString();
+  return hashedInputPassword === storedHashedPassword;
 }
 
 export default function LoginScreen() {
@@ -54,27 +24,77 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const auth = FIREBASE_AUTH;
 
+  async function registerUser() {
+    const hashedPassword = CryptoJS.SHA256(password).toString();
+    const userDocRef = doc(db, 'Users', dxnId);
+
+    await setDoc(userDocRef, {
+      email: dxnId,
+      password: hashedPassword,
+      createdAt: new Date(),
+    });
+
+    saveUserSession(dxnId);
+    console.log('User registered successfully');
+    router.replace('/(tabs)');
+  }
+
+  async function loginUser() {
+    const userDocRef = doc(db, 'Users', dxnId);
+    const userDoc = await getDoc(userDocRef);
+
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      const isPasswordCorrect = verifyPassword(password, userData.password);
+
+      if (isPasswordCorrect) {
+        console.log('Login successful');
+        saveUserSession(dxnId);
+        router.replace('/(tabs)');
+        // Save user session data here
+      } else {
+        console.error('Invalid password');
+      }
+    } else {
+      console.error('No user found with this email');
+    }
+  }
+
+  async function saveUserSession(id: string) {
+    await AsyncStorage.setItem('dxn_id', id);
+  }
+
   return (
     <ScrollView contentContainerStyle={{ alignItems: "center", justifyContent: "center", paddingVertical: 35, minHeight: "100%" }}>
       <KeyboardAvoidingView style={{ alignItems: "center", justifyContent: "center", width: "100%", flex: 1 }}>
         <Text style={{ fontSize: 35 }}>{isRegister ?  'إنشاء حساب': 'تسجيل الدخول' }</Text>
         <View style={styles.form}>
+          <View style={styles.formRow}>
+            <Text style={styles.label}>رقم العضوية</Text>
+            <TextInput
+              keyboardType='numeric'
+              style={styles.input}
+              onChangeText={setDxnId}
+              value={dxnId}
+              placeholder="رقم عضوية دي اكس ان"
+            />
+          </View>
           {!isRegister || (
             <>
               <View style={styles.formRow}>
                 <Text style={styles.label}>الإسم</Text>
                 <TextInput
                   style={styles.input}
-                  onChangeText={text => setName(text)}
+                  onChangeText={setName}
                   value={name}
                   placeholder="الاسم الكامل"
                 />
               </View>
               <View style={styles.formRow}>
-                <Text style={styles.label}>رقم الهاتف</Text>
+                <Text style={styles.label}>رقم الواتساب</Text>
                 <TextInput
                   style={styles.input}
-                  onChangeText={e => setPhone(e)}
+                  onChangeText={setPhone}
                   value={phone}
                   placeholder="رقم التواصل"
                 />
@@ -83,37 +103,29 @@ export default function LoginScreen() {
                 <Text style={styles.label}>اسم الراعي</Text>
                 <TextInput
                   style={styles.input}
-                  onChangeText={upline => setUplineName(upline)}
+                  onChangeText={setUplineName}
                   value={uplineName}
-                  placeholder="الاسم الراعي المباشر"
+                  placeholder="اسم الراعي المباشر"
                 />
               </View>
             </>
           )}
           <View style={styles.formRow}>
-            <Text style={styles.label}>رقم المعرف</Text>
-            <TextInput
-              keyboardType='numeric'
-              style={styles.input}
-              onChangeText={id => {
-                setDxnId(id)
-              }}
-              value={dxnId}
-              placeholder="رقم معرف دي اكس ان"
-            />
-          </View>
-          <View style={styles.formRow}>
             <Text style={styles.label}>كلمة المرور</Text>
             <TextInput
               style={styles.input}
-              onChangeText={pass => setPassword(pass)}
+              onChangeText={setPassword}
               value={password}
               placeholder="كلمة المرور"
             />
           </View>
           <View style={{ marginBottom: 8, }}>
-            <Button title={!isRegister ?  'إنشاء حساب': 'تسجيل الدخول' } onPress={async (e) => {
-              await loginUser(dxnId, password)
+            <Button title={isRegister ?  'إنشاء حساب': 'تسجيل الدخول' } onPress={() => {
+              if (isRegister) {
+                registerUser()
+              }else {
+                loginUser()
+              }
             }} />
           </View>
           <View style={{ marginBottom: 8, }}>
@@ -121,7 +133,7 @@ export default function LoginScreen() {
               setIsRegister(!isRegister)
             }}>
               <Text style={{ textAlign: "center",  }}>
-                {isRegister ?  'إنشاء حساب': 'تسجيل الدخول' }
+                {!isRegister ?  'إنشاء حساب': 'تسجيل الدخول' }
               </Text>
             </Pressable>
           </View>
