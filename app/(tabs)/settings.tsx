@@ -105,7 +105,7 @@ export default function SettingsScreen() {
     setMembersCount(membersCount);
     console.log("Refresh Data")
   }
-
+  
   const onRefresh = async () => {
     setRefreshing(true);
     try {
@@ -118,17 +118,18 @@ export default function SettingsScreen() {
       setRefreshing(false);
     }
   };
-
+  
   useEffect(() => {
-
+    
     async function init() {
       const id = await getUserSession();
       if (id) {
         setDxnId(id)
         const {leadsCount, dailyLeadsCount} = await getCurrentMonthLeadsCount(id);
-        const {membersCount} = await getCurrentMonthMembersCount(id);
+        const {membersCount, dailyMembersCount} = await getCurrentMonthMembersCount(id);
         setLeadsCount(leadsCount);
         setData(dailyLeadsCount);
+        setMembersData(dailyMembersCount);
         setMembersCount(membersCount);
         console.log(data)
       }else {
@@ -139,7 +140,6 @@ export default function SettingsScreen() {
     init();
 
   }, []);
-
 
   return (
     <ScrollView
@@ -154,23 +154,20 @@ export default function SettingsScreen() {
         <Text style={styles.title}>أعداد المستقطبين هذا الشهر</Text>
       </View>
       <View style={{ height: 250, flexDirection: 'row', paddingHorizontal: 10 }}>
-        <YAxis
-          data={data}
-          contentInset={{ top: 15, bottom: 30 }}
-          // style={{ paddingTop: 30 }}
-          svg={{
-            fill: 'grey',
-            fontSize: 10,
-          }}
-          numberOfTicks={5}
-          {...LineDefaultProps}
-        />
+        <View style={{ flexDirection: "column-reverse", justifyContent: "space-evenly", gap: 20, paddingTop: 10, paddingBottom: 50 }}>
+          {[...Array(10)].map((e, i) => {
+            const number = Math.ceil((Math.max(...data, ...membersData) * (0.1 * (i + 1))) * 10) / 10;
+            return (
+              <Text style={{ color: "gray", fontSize: 10, }} key={i}>{number}</Text>
+            )}
+          )}
+        </View>
         <ScrollView horizontal={true} >
           <View style={{ height: 250, width: 600, paddingHorizontal: 12 }}>
             <LineChart
               style={{ flex: 1 }}
               data={[
-                { data: data, svg: { stroke: 'black' } },
+                { data: data },
                 { data: membersData, svg: { stroke: 'green' }},
               ]}
               gridMin={0}

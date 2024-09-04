@@ -29,8 +29,8 @@ export default function LeadCard({ name, relationShip, contactMedia, leadsCount 
                 <LinearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
                   {/* <Stop offset="0" stopColor="#171717" stopOpacity="1" /> */}
                   {/* <Stop offset="1" stopColor="#212121" stopOpacity="1" /> */}
-                  <Stop offset="0" stopColor="#E7E7E7" stopOpacity="1" />
-                  <Stop offset="1" stopColor="#F8F8F8" stopOpacity="1" />
+                  <Stop offset="0" stopColor="#32bbd9" stopOpacity="1" />
+                  <Stop offset="1" stopColor="#c8f0f8" stopOpacity="1" />
                 </LinearGradient>
               </Defs>
               <Rect x="0" y="0" width="80" height="80" fill="url(#grad)"></Rect>
@@ -151,8 +151,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 6,
     // backgroundColor: "#999",// dark mood
-    backgroundColor: "#EfEfEf",
-    borderColor: "#DfDfDf",
+    // backgroundColor: "#EfEfEf",// light mood
+    backgroundColor: "#c8f0f8",
+    // borderColor: "#DfDfDf",
+    borderColor: "#b0e1eb",
     borderWidth: 1,
     borderRadius: 10,
   },

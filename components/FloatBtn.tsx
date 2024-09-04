@@ -32,7 +32,8 @@ const styles = StyleSheet.create({
     right: 15,
   },
   icon: {
-    backgroundColor: "#D7D7D7",
+    // backgroundColor: "#D7D7D7",// light mood
+    backgroundColor: "#68eb74",
     borderRadius: 50,
     width: 55,
     height: 55,
@@ -42,7 +43,8 @@ const styles = StyleSheet.create({
     textAlignVertical: "center",
     alignItems: "center",
     justifyContent: "center",
-    borderColor: "#C3C3C3",
+    // borderColor: "#C3C3C3",// light mood
+    borderColor: "#4ecf5b",
     color: "#3B3B3B",
     borderWidth: 1
   },
