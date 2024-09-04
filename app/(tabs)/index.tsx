@@ -8,10 +8,12 @@ import { collection, query, where, getDocs, addDoc, updateDoc, doc } from "fireb
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FloatBtn from "@/components/FloatBtn";
 import LeadCard from '@/components/LeadCard';
+import MemberCard from '@/components/MemberCard';
 import LeadForm from '@/components/LeadForm';
 import GroupLeadForm from '@/components/GroupLeadForm';
 import MemberForm from '@/components/MemberForm';
-import { Lead } from '@/utils/types';
+import { Member, Lead } from '@/utils/types';
+import { getUserSession } from "@/utils/functions"
 import CustomBtn from '@/components/CustomBtn';
 
 export default function HomeScreen() {
@@ -19,6 +21,8 @@ export default function HomeScreen() {
   const [editLead, setEditLead] = useState<Lead | undefined>(undefined);
   const [visible, setVisible] = useState(0);
   const [leads, setLeads] = useState<Array<Lead>>([]);
+  const [members, setMembers] = useState<Array<Member>>([]);
+  const [editMember, setEditMember] = useState<Member | undefined>(undefined);
 
 
   useEffect(() => {
@@ -29,17 +33,28 @@ export default function HomeScreen() {
       
       try {
         
+        const userId = await getUserSession();
         const startOfToday = new Date();
         startOfToday.setHours(0, 0, 0, 0);
 
         const querySnapshot = await getDocs(
           query(
             collection(db, "Leads"),
-            where("date", ">=", startOfToday)
+            where("date", ">=", startOfToday),
+            where("userId", "==", userId)
+          )
+        );
+
+        const querySnapshotMembers = await getDocs(
+          query(
+            collection(db, "Members"),
+            where("date", ">=", startOfToday),
+            where("userId", "==", userId)
           )
         );
 
         const leadsList: Array<Lead> = [];
+        const membersList: Array<Member> = [];
   
         if (querySnapshot.docs && querySnapshot.docs.length > 0) {
           querySnapshot.docs.forEach((doc: any) => {
@@ -51,8 +66,20 @@ export default function HomeScreen() {
             });
           });
         }
+  
+        if (querySnapshotMembers.docs && querySnapshotMembers.docs.length > 0) {
+          querySnapshotMembers.docs.forEach((doc: any) => {
+            const dbMemberInfo = doc.data();
+            membersList.push({
+              id: doc.id,
+              ...dbMemberInfo,
+              date: new Date(dbMemberInfo.date.seconds * 1000 + dbMemberInfo.date.nanoseconds / 1000000),
+            });
+          });
+        }
 
         setLeads(leadsList);
+        setMembers(membersList);
       } catch (e) {
         console.error("Error fetching documents: ", e);
       }
@@ -114,11 +141,70 @@ export default function HomeScreen() {
     }
   }
 
+  const saveMember = async (member: Member, memberId: string | undefined) => {
+    if (memberId) {// edit an existing member
+      try {
+        if (member.name) {
+          const memberRef = doc(db, "Members", memberId); // Replace memberId with the actual ID of the member you want to edit
+          await updateDoc(memberRef, {
+            ...member,
+            date: new Date(),
+          });
+          console.log("Document updated with ID: ", memberId);
+          
+          setMembers(members.map(i => i.id === memberId ? member : i));
+          setVisible(0);
+          setEditMember(undefined)
+        } else {
+          setVisible(0);
+          setEditMember(undefined)
+          alert("الاسم مطلوب, يرجى تعبئته بشكل صحيح!")
+          console.error("the member name is required");
+        }
+      } catch (err) {
+        alert("error updating member: " + err);
+        console.error("Error updating document: ", err);
+      }
+    }else {// add new member
+      try {
+        if (member.name) {
+          const docRef = await addDoc(collection(db, "Members"), {
+            ...member,
+            date: new Date(),
+          });
+          console.log("Document written with ID: ", docRef.id);
+          setMembers([...members, member])
+          setVisible(0);
+          setEditMember(undefined)
+        }else {
+          setVisible(0);
+          setEditMember(undefined)
+          alert("الاسم مطلوب, يرجى تعبئته بشكل صحيح!")
+          console.error("the member name is required")
+        }
+      } catch (err) {
+        alert("error adding member: " + err)
+        console.error("Error adding document: ", err);
+      }
+    }
+  }
+
   return (
     <>
       <View style={{ flex: 1 }}>
         <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 30, paddingTop: 50, }}>
           <Text style={styles.title}>حالات الإستقطاب اليومية:</Text>
+          {members.map((member, index) => {
+            return (
+              <MemberCard key={index}
+                {...member}
+                handler={(e) => {
+                  setVisible(3)
+                  setEditMember(member)
+                }}
+                />
+            );
+          })}
           {leads.map((lead, index) => {
             return (
               <LeadCard key={index}
@@ -207,18 +293,18 @@ export default function HomeScreen() {
         visible={visible == 3}
         onRequestClose={() => {
           setVisible(0)
-          setEditLead(undefined)
+          setEditMember(undefined)
         }}
       >
         <Pressable
           style={styles.modalOverlay}
           onPress={(e) => {
             setVisible(0);
-            setEditLead(undefined)
+            setEditMember(undefined)
           }}
         >
           <KeyboardAvoidingView style={styles.fullCenterContent}>
-            <MemberForm saveHandler={saveLead} info={editLead} />
+            <MemberForm saveHandler={saveMember} info={editMember} />
           </KeyboardAvoidingView>
         </Pressable>
       </Modal>

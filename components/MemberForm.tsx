@@ -38,6 +38,7 @@ export default function MemberForm({ saveHandler, info }: MemberFormProps) {
           <View style={styles.formRow}>
             <Text style={styles.label}>رقم العضوية</Text>
             <TextInput
+              keyboardType='numeric'
               style={styles.input}
               onChangeText={(e) => {
                 setFormInfo({...formInfo, dxnId: e})

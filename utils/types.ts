@@ -8,6 +8,13 @@ export type Lead = {
   date?: Date,
 };
 
+export type Member = {
+  id?: string,
+  name: string,
+  dxnId?: string,
+  date?: Date,
+};
+
 export type User = {
   dxnId: string,
   name: string,

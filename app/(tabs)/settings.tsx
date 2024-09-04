@@ -10,6 +10,7 @@ import Card from "@/components/Card"
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/firebaseConfig"; 
 import { getUserSession } from "@/utils/functions"
+import { Lead } from '@/utils/types';
 
 export default function SettingsScreen() {
 
@@ -40,9 +41,10 @@ export default function SettingsScreen() {
       const leadsCount = querySnapshot.size;
       
       querySnapshot.forEach(doc => {
-        const leadDate = doc.data().date.toDate(); // Convert Firestore timestamp to JS Date
-        const day = leadDate.getDate(); // Get the day of the month (1-31)
-        dailyLeadsCount[day - 1] += doc.data().leadsCount; // Increment the count for that day
+        const leadDate = doc.data().date.toDate();
+        const day = leadDate.getDate(); 
+        const val = doc.data().leadsCount ? parseInt(doc.data().leadsCount) : 1
+        dailyLeadsCount[day - 1] += isNaN(val) ? 1 : val;
       });
 
       console.log(`Leads count for the current month: ${leadsCount}`);
@@ -79,6 +81,7 @@ export default function SettingsScreen() {
       });
 
       console.log(`Members count for the current month: ${membersCount}`);
+      console.log(dailyMembersCount)
       return {membersCount: membersCount, dailyMembersCount: dailyMembersCount};
     } catch (err) {
       console.error("Error getting members count: ", err);
@@ -90,14 +93,17 @@ export default function SettingsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [leadsCount, setLeadsCount] = useState(0);
   const [membersCount, setMembersCount] = useState(0);
+  const [membersData, setMembersData] = useState([]);
   const [dxnId, setDxnId] = useState("");
-
+  
   const refreshData = async (id: string) => {
-    const {leadsCount, dailyLeadsCount} = await getCurrentMonthLeadsCount(id);
-    const {membersCount} = await getCurrentMonthMembersCount(id);
+    const {leadsCount, dailyLeadsCount } = await getCurrentMonthLeadsCount(id);
+    const {membersCount, dailyMembersCount} = await getCurrentMonthMembersCount(id);
     setLeadsCount(leadsCount);
     setData(dailyLeadsCount);
+    setMembersData(dailyMembersCount);
     setMembersCount(membersCount);
+    console.log("Refresh Data")
   }
 
   const onRefresh = async () => {
@@ -119,7 +125,12 @@ export default function SettingsScreen() {
       const id = await getUserSession();
       if (id) {
         setDxnId(id)
-        await refreshData(id);
+        const {leadsCount, dailyLeadsCount} = await getCurrentMonthLeadsCount(id);
+        const {membersCount} = await getCurrentMonthMembersCount(id);
+        setLeadsCount(leadsCount);
+        setData(dailyLeadsCount);
+        setMembersCount(membersCount);
+        console.log(data)
       }else {
         console.error("there is no dxn id");
       }
@@ -158,7 +169,10 @@ export default function SettingsScreen() {
           <View style={{ height: 250, width: 600, paddingHorizontal: 12 }}>
             <LineChart
               style={{ flex: 1 }}
-              data={data}
+              data={[
+                { data: data, svg: { stroke: 'black' } },
+                { data: membersData, svg: { stroke: 'green' }},
+              ]}
               gridMin={0}
               contentInset={{ top: 10, bottom: 10 }}
               svg={{ stroke: Colors.light.tint }}
