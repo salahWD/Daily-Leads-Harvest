@@ -1,12 +1,13 @@
 import { KeyboardAvoidingView, ScrollView, StyleSheet, View, Text, TextInput, Button, Pressable, } from 'react-native';
 
 import { db, FIREBASE_AUTH } from '@/firebaseConfig'; // Adjust the path as necessary
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, query, collection, where } from "firebase/firestore";
 import { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { router } from 'expo-router';
 import CryptoJS from 'crypto-js';
+import CustomDropdown from '@/components/CustomDropdown';
 
 
 function verifyPassword(inputPassword: string, storedHashedPassword: string) {
@@ -17,6 +18,7 @@ function verifyPassword(inputPassword: string, storedHashedPassword: string) {
 export default function LoginScreen() {
 
   const [isRegister, setIsRegister] = useState(false);
+  const [countryCode, setCountryCode] = useState("+961");
   const [phone, setPhone] = useState("");
   const [uplineName, setUplineName] = useState("");
   const [name, setName] = useState("");
@@ -28,15 +30,28 @@ export default function LoginScreen() {
     const hashedPassword = CryptoJS.SHA256(password).toString();
     const userDocRef = doc(db, 'Users', dxnId);
 
-    await setDoc(userDocRef, {
-      email: dxnId,
-      password: hashedPassword,
-      createdAt: new Date(),
-    });
+    const isRegisteredUser = await getDoc(doc(db, "Users", dxnId));
 
-    saveUserSession(dxnId);
-    console.log('User registered successfully');
-    router.replace('/(tabs)');
+    console.log("is this user registered before ? ==>", isRegisteredUser.exists())
+
+    if (isRegisteredUser.exists()) {
+      alert("رقم العضوية هذا مسجل بالفعل, جرّب تسجيل الدخول او تواصل مع قائد الفريق (الأبلاين) لتعدي هذه العقبة")
+    }else {
+      
+      await setDoc(userDocRef, {
+        userId: dxnId,
+        name: name,
+        phone: phone,
+        uplineName: uplineName,
+        countryCode: countryCode,
+        password: hashedPassword,
+        createdAt: new Date(),
+      });
+  
+      saveUserSession(dxnId);
+      console.log('User registered successfully');
+      router.replace('/(tabs)');
+    }
   }
 
   async function loginUser() {
@@ -92,12 +107,20 @@ export default function LoginScreen() {
               </View>
               <View style={styles.formRow}>
                 <Text style={styles.label}>رقم الواتساب</Text>
-                <TextInput
-                  style={styles.input}
-                  onChangeText={setPhone}
-                  value={phone}
-                  placeholder="رقم التواصل"
-                />
+                <View
+                  style={{ flexDirection: "row", justifyContent: "space-between", gap: 10 }}>
+                  <CustomDropdown
+                    defaultState={{title: "لبنان", value: "+90"}}
+                    onSelect={e => setCountryCode(e.value)}
+                    data={[{title: "لبنان", value: "+90"}]} />
+                  <TextInput
+                    style={styles.input}
+                    keyboardType='numeric'
+                    onChangeText={setPhone}
+                    value={phone}
+                    placeholder="رقم التواصل"
+                  />
+                </View>
               </View>
               <View style={styles.formRow}>
                 <Text style={styles.label}>اسم الراعي</Text>

@@ -11,7 +11,7 @@ import {
 
 export type Option = {
   title: string,
-  value: number | undefined
+  value: number | string | undefined
 };
 
 export type CustomDropdownProps = {
@@ -53,7 +53,7 @@ const CustomDropdown = ({ data, onSelect, defaultState = { title: "", value: 0 }
   };
 
   return (
-    <View style={styles.container}>
+    <View style={ styles.container }>
       <TouchableOpacity
         style={styles.dropdown}
         onPress={() => setVisible(true)}

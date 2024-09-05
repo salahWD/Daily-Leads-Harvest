@@ -37,7 +37,8 @@ export default function RootLayout() {
 
       if (Id) {
         console.log('User is logged in:', Id);
-        router.replace('/(tabs)');
+        router.replace('/login');
+        // router.replace('/(tabs)');
         // You can retrieve user data from Firestore if needed
       } else {
         console.log('user should login');

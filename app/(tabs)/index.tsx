@@ -18,6 +18,7 @@ import CustomBtn from '@/components/CustomBtn';
 
 export default function HomeScreen() {
 
+  const [userDxnId, setUserDxnId] = useState("");
   const [editLead, setEditLead] = useState<Lead | undefined>(undefined);
   const [visible, setVisible] = useState(0);
   const [leads, setLeads] = useState<Array<Lead>>([]);
@@ -34,6 +35,7 @@ export default function HomeScreen() {
       try {
         
         const userId = await getUserSession();
+        setUserDxnId(userId ?? "");
         const startOfToday = new Date();
         startOfToday.setHours(0, 0, 0, 0);
 
@@ -122,6 +124,7 @@ export default function HomeScreen() {
             ...lead,
             contactMedia: lead.contactMedia != undefined && lead.contactMedia >= 0 ? lead.contactMedia : 0,
             relationShip: lead.relationShip != undefined && lead.relationShip >= 0 ? lead.relationShip : 0,
+            userId: userDxnId,
             date: new Date(),
           });
           console.log("Document written with ID: ", docRef.id);
@@ -170,6 +173,7 @@ export default function HomeScreen() {
         if (member.name) {
           const docRef = await addDoc(collection(db, "Members"), {
             ...member,
+            userId: userDxnId,
             date: new Date(),
           });
           console.log("Document written with ID: ", docRef.id);
@@ -194,6 +198,9 @@ export default function HomeScreen() {
       <View style={{ flex: 1 }}>
         <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 30, paddingTop: 50, }}>
           <Text style={styles.title}>حالات الإستقطاب اليومية:</Text>
+          {members.length == 0 && 
+            <Text style={{ textAlign: "center", color: "gray", marginTop: 30, fontSize: 18, lineHeight: 25 }}>إبدأ بتسجيل حالات الإستقطاب بشكل يومي لمراجعة تقدمك وتحسين ادائك بإذن الله</Text>
+          }
           {members.map((member, index) => {
             return (
               <MemberCard key={index}
