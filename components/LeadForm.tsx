@@ -35,7 +35,7 @@ export default function LeadForm({ saveHandler, info, pressHandler }: LeadFormPr
             />
           </View>
           <View>
-            <Text style={styles.label}>وسيلة التواصل مع المستقطَب</Text>
+            <Text style={styles.label}>العلاقة مع المستقطَب</Text>
             <CustomDropdown
               data={relationShipTypes}
               onSelect={(e) => {
@@ -48,7 +48,7 @@ export default function LeadForm({ saveHandler, info, pressHandler }: LeadFormPr
             />
           </View>
           <View>
-            <Text style={styles.label}>العلاقة مع المستقطَب</Text>
+            <Text style={styles.label}>وسيلة التواصل مع المستقطَب</Text>
             <CustomDropdown
               data={contactMediaTypes}
               onSelect={(e) => {

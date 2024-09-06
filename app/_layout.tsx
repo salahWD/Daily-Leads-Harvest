@@ -2,7 +2,7 @@ import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
@@ -19,10 +19,11 @@ I18nManager.allowRTL(true);
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  
+  const [logedIn, setLogedIn] = useState(false);
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     if (loaded) {
@@ -31,22 +32,27 @@ export default function RootLayout() {
   }, [loaded]);
 
   useEffect(() => {
-    
-    async function checkUserState() {
-      const Id = await getUserSession();
+    if (isMounted && loaded) {
+      async function checkUserState() {
+        const Id = await getUserSession();
 
-      if (Id) {
-        console.log('User is logged in:', Id);
-        router.replace('/login');
-        // router.replace('/(tabs)');
-        // You can retrieve user data from Firestore if needed
-      } else {
-        console.log('user should login');
-        router.replace('/login');
+        if (Id) {
+          console.log('User is logged in:', Id);
+          setLogedIn(true);
+          router.replace('/(tabs)');
+        } else {
+          console.log('User should login');
+          setLogedIn(false);
+          router.replace('/login');
+        }
       }
-    }
 
-    checkUserState();
+      checkUserState();
+    }
+  }, [isMounted, loaded]);
+
+  useEffect(() => {
+    setIsMounted(true);
   }, []);
 
   if (!loaded) {
@@ -56,8 +62,11 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={DefaultTheme}>
       <Stack>
-        <Stack.Screen name="login" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        {logedIn ? (
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        ) : (
+          <Stack.Screen name="login" options={{ headerShown: false }} />
+        )}
         <Stack.Screen name="+not-found" />
       </Stack>
     </ThemeProvider>
