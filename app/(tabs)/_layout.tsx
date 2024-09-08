@@ -1,10 +1,8 @@
 import { Tabs } from 'expo-router';
-import { Stack } from 'expo-router/stack';
 
 import React from 'react';
 
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import { Colors } from '@/constants/Colors';
 

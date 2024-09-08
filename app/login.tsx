@@ -1,6 +1,7 @@
 import { KeyboardAvoidingView, ScrollView, StyleSheet, View, Text, TextInput, Button, Pressable, } from 'react-native';
 
-import { db, FIREBASE_AUTH } from '@/firebaseConfig'; // Adjust the path as necessary
+import { db, FIREBASE_AUTH } from '@/firebaseConfig';
+import { countryCodeList } from '@/utils/valueLists';
 import { doc, setDoc, getDoc, query, collection, where } from "firebase/firestore";
 import { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -110,9 +111,9 @@ export default function LoginScreen() {
                 <View
                   style={{ flexDirection: "row", justifyContent: "space-between", gap: 10 }}>
                   <CustomDropdown
-                    defaultState={{title: "لبنان", value: "+90"}}
+                    defaultState={countryCodeList[0]}
                     onSelect={e => setCountryCode(e.value)}
-                    data={[{title: "لبنان", value: "+90"}]} />
+                    data={countryCodeList} />
                   <TextInput
                     style={styles.input}
                     keyboardType='numeric'

@@ -4,9 +4,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
-import { I18nManager } from 'react-native';
+import { I18nManager, Text } from 'react-native';
 
 import { getUserSession } from "@/utils/functions"
 
@@ -19,11 +17,10 @@ I18nManager.allowRTL(true);
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [logedIn, setLogedIn] = useState(false);
+  
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
-  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     if (loaded) {
@@ -31,42 +28,18 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
-  useEffect(() => {
-    if (isMounted && loaded) {
-      async function checkUserState() {
-        const Id = await getUserSession();
-
-        if (Id) {
-          console.log('User is logged in:', Id);
-          setLogedIn(true);
-          router.replace('/(tabs)');
-        } else {
-          console.log('User should login');
-          setLogedIn(false);
-          router.replace('/login');
-        }
-      }
-
-      checkUserState();
-    }
-  }, [isMounted, loaded]);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
   if (!loaded) {
-    return null;
+    return (
+      <Text style={{ fontSize: 32 }}>NAAAAL</Text>
+    );
   }
 
   return (
     <ThemeProvider value={DefaultTheme}>
       <Stack>
-        {logedIn ? (
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        ) : (
-          <Stack.Screen name="login" options={{ headerShown: false }} />
-        )}
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
     </ThemeProvider>

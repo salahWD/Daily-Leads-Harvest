@@ -199,7 +199,7 @@ export default function HomeScreen() {
         <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 30, paddingTop: 50, }}>
           <Text style={styles.title}>حالات الإستقطاب اليومية:</Text>
           {members.length == 0 && 
-            <Text style={{ textAlign: "center", color: "gray", marginTop: 30, fontSize: 18, lineHeight: 25 }}>إبدأ بتسجيل حالات الإستقطاب بشكل يومي لمراجعة تقدمك وتحسين ادائك بإذن الله</Text>
+            <Text style={{ textAlign: "center", color: "gray", marginTop: 30, fontSize: 18, lineHeight: 25 }}>إبدأ بتسجيل حالات الإستقطاب بشكل يومي لمراجعة تقدمك وتحسين ادائك</Text>
           }
           {members.map((member, index) => {
             return (

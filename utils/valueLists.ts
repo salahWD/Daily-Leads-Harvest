@@ -22,3 +22,8 @@ export const groupContactMediaTypes: Array<Option> = [
   { title: 'محاضرة عامة', value: 3 },
   { title: 'اخرى', value: 4 },
 ];
+
+export const countryCodeList: Array<Option> = [
+  {title: "لبنان +961", value: "+961"},
+  {title: "تركيا +90", value: "+90"},
+];
